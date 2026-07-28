@@ -1,0 +1,38 @@
+services:
+  turtlima:
+    image: turtlima:latest
+    container_name: turtlima
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        ROS_DISTRO: ${ROS_DISTRO:-jazzy}
+        USERNAME: ${USERNAME:-turtlima}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    environment:
+      ROS_DISTRO: ${ROS_DISTRO:-jazzy}
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+      XAUTHORITY: /root/.Xauthority
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      LD_LIBRARY_PATH: /usr/local/cuda/lib64
+    network_mode: host
+    ipc: host
+    privileged: true
+    shm_size: 2g
+    working_dir: /turtlima
+    tty: true
+    stdin_open: true
+    command: bash
+    runtime: nvidia
+    volumes:
+      - .:/turtlima:delegated
+      - ${HOME}/.ssh:/home/${USERNAME:-turtlima}/.ssh:ro
+      - ./src:/turtlima/src
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${XAUTHORITY:-~/.Xauthority}:/root/.Xauthority:ro
+      - /usr/local/cuda/lib64:/usr/local/cuda/lib64:ro
