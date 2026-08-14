@@ -44,7 +44,7 @@ RUN pip3 install --no-cache-dir --ignore-installed -r requirements.txt \
 
 ARG ROS_DISTRO
 COPY . /turtlima
-RUN vcs import src < dependencies.repos
+RUN mkdir -p src && vcs import src < dependencies.repos
 RUN apt-get update && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -r -y --rosdistro ${ROS_DISTRO} && \
