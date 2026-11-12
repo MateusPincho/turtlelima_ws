@@ -5,8 +5,10 @@ if [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ]; then
   source "/opt/ros/${ROS_DISTRO}/setup.bash"
 fi
 
-if [ -f "/turtlima/install/setup.bash" ]; then
-  source "/turtlima/install/setup.bash"
+if [ -f "/turtlelima/install/setup.bash" ]; then
+  source "/turtlelima/install/setup.bash"
+elif [ -f "/opt/turtlelima/install/setup.bash" ]; then
+  source "/opt/turtlelima/install/setup.bash"
 fi
 
 exec "$@"

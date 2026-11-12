@@ -1,38 +1,79 @@
+x-build-args: &default-build-args
+  ROS_DISTRO: ${ROS_DISTRO:-jazzy}
+  USERNAME: ${USERNAME:-turtlelima}
+  USER_UID: ${USER_UID:-1000}
+  USER_GID: ${USER_GID:-1000}
+
+x-common-env: &default-env
+  ROS_DISTRO: ${ROS_DISTRO:-jazzy}
+  ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+  RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+  DISPLAY: ${DISPLAY}
+  QT_X11_NO_MITSHM: 1
+  XAUTHORITY: /root/.Xauthority
+  NVIDIA_VISIBLE_DEVICES: all
+  NVIDIA_DRIVER_CAPABILITIES: all
+
 services:
-  turtlima:
-    image: turtlima:latest
-    container_name: turtlima
+  dev:
+    image: turtlelima:dev
+    container_name: turtlelima-dev
     build:
       context: .
       dockerfile: docker/Dockerfile
-      args:
-        ROS_DISTRO: ${ROS_DISTRO:-jazzy}
-        USERNAME: ${USERNAME:-turtlima}
-        USER_UID: ${USER_UID:-1000}
-        USER_GID: ${USER_GID:-1000}
-    environment:
-      ROS_DISTRO: ${ROS_DISTRO:-jazzy}
-      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-40}
-      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}
-      DISPLAY: ${DISPLAY}
-      QT_X11_NO_MITSHM: 1
-      XAUTHORITY: /root/.Xauthority
-      NVIDIA_VISIBLE_DEVICES: all
-      NVIDIA_DRIVER_CAPABILITIES: all
-      LD_LIBRARY_PATH: /usr/local/cuda/lib64
+      target: dev
+      args: *default-build-args
+    environment: *default-env
     network_mode: host
     ipc: host
     privileged: true
     shm_size: 2g
-    working_dir: /turtlima
+    working_dir: /turtlelima
     tty: true
     stdin_open: true
     command: bash
-    runtime: nvidia
     volumes:
-      - .:/turtlima:delegated
-      - ${HOME}/.ssh:/home/${USERNAME:-turtlima}/.ssh:ro
-      - ./src:/turtlima/src
+      - ./src:/turtlelima/src
+      - /dev/bus/usb:/dev/bus/usb
+      - ${HOME}/.ssh:/home/${USERNAME:-turtlelima}/.ssh:ro
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ${XAUTHORITY:-~/.Xauthority}:/root/.Xauthority:ro
-      - /usr/local/cuda/lib64:/usr/local/cuda/lib64:ro
+      - /${HOME}/dataset:/turtlelima/dataset
+
+  dev-gpu:
+    image: turtlelima:dev-gpu-${TARGET_PLATFORM:-arm}
+    container_name: turtlelima-dev-gpu
+    extends: dev
+    profiles:
+      - gpu
+    runtime: ${GPU_RUNTIME:-nvidia}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev-gpu-${TARGET_PLATFORM:-arm}
+      args: *default-build-args
+
+  runtime:
+    image: turtlelima:runtime
+    container_name: turtlelima-runtime
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: runtime
+      args: *default-build-args
+      ssh:
+        - default
+    environment: *default-env
+    network_mode: host
+    ipc: host
+    privileged: true
+    shm_size: 1g
+    working_dir: /opt/turtlelima
+    command: bash

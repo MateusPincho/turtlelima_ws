@@ -1,1 +1,23 @@
 # AI/ML dependencies for the Jetson Orin Nano go here.
+# Deep learning
+torch==2.8
+transformers==4.53
+onnx==1.22.0
+onnxruntime==1.24.1
+
+# Vision / image
+Pillow>=10.1.0
+opencv-python
+
+# Scientific computing
+numpy<2.0
+scipy==1.17.0
+matplotlib
+
+
+# Robotics utilities
+rosbags
+
+# Pin setuptools to a version compatible with colcon --symlink-install
+# (setuptools >=72.2.0 dropped the legacy 'develop' command that colcon uses)
+setuptools<72.2.0
