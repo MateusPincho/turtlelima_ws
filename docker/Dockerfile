@@ -2,6 +2,7 @@ ARG ROS_DISTRO=jazzy
 ARG TARGET_PLATFORM=arm
 
 FROM ros:${ROS_DISTRO}-ros-base AS base
+ARG ROS_DISTRO
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 
@@ -22,6 +23,9 @@ RUN apt-get update && \
       python3-rosdep \
       python3-vcstool \
       libusb-1.0-0-dev \
+      ros-${ROS_DISTRO}-realsense2-camera \
+      ros-${ROS_DISTRO}-realsense2-camera-msgs \
+      ros-${ROS_DISTRO}-realsense2-description \
       sudo \
       nano \
       fzf \
