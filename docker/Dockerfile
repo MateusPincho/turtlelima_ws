@@ -39,11 +39,6 @@ RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-# Cyclone DDS, the same middleware the Create 3 runs.
-COPY docker/cyclonedds.xml /opt/dds/cyclonedds.xml
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
-    CYCLONEDDS_URI=file:///opt/dds/cyclonedds.xml
-
 # Prime rosdep so both builder and interactive shells work.
 RUN rosdep init 2>/dev/null || true && rosdep update
 
@@ -145,9 +140,7 @@ ENV LANG=en_US.UTF-8 \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ros-${ROS_DISTRO}-rmw-cyclonedds-cpp && \
     rm -rf /var/lib/apt/lists/*
-COPY docker/cyclonedds.xml /opt/dds/cyclonedds.xml
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
-    CYCLONEDDS_URI=file:///opt/dds/cyclonedds.xml
 COPY --from=builder /turtlelima/install /opt/turtlelima/install
 COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
 WORKDIR /opt/turtlelima
