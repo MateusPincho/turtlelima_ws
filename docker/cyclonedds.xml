@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cyclone DDS settings shared by the robot and the segmentation server.
+  Loaded through CYCLONEDDS_URI (set in docker/Dockerfile and docker-compose.yml).
+
+  Network interfaces are not fixed here (Cyclone picks one automatically).
+  On a host that needs specific interfaces, e.g. the robot talking to the
+  Create 3 and to Wi-Fi, append an override in .env, as in this example:
+    CYCLONEDDS_URI=file:///opt/dds/cyclonedds.xml,<CycloneDDS><Domain><General><Interfaces><NetworkInterface name="wlan0"/><NetworkInterface name="usb0"/></Interfaces></General></Domain></CycloneDDS>
+  Cyclone merges the comma separated configurations in order.
+-->
+<CycloneDDS xmlns="https://cdds.io/config"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
+  <Domain Id="any">
+    <General>
+      <!-- Multicast only for participant discovery (SPDP); all data is sent
+           unicast. Avoids flooding Wi-Fi with multicast image traffic while
+           discovery of the Create 3 keeps working. -->
+      <AllowMulticast>spdp</AllowMulticast>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>64</MaxAutoParticipantIndex>
+    </Discovery>
+    <Internal>
+      <!-- Larger kernel receive buffer for fragmented image messages.
+           Requires net.core.rmem_max on the host to be at least this value
+           (see src/turtlelima/docs/implementation.md). Default keeps the kernel
+           value so the node still starts on an untuned host. -->
+      <SocketReceiveBufferSize min="${CYCLONEDDS_RCVBUF:-default}"/>
+    </Internal>
+  </Domain>
+</CycloneDDS>

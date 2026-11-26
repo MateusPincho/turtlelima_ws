@@ -7,7 +7,16 @@ x-build-args: &default-build-args
 x-common-env: &default-env
   ROS_DISTRO: ${ROS_DISTRO:-jazzy}
   ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
-  RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+  RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}
+  # Cyclone config baked into the image; append per-host overrides in .env
+  # (e.g. network interfaces, see docker/cyclonedds.xml).
+  CYCLONEDDS_URI: ${CYCLONEDDS_URI:-file:///opt/dds/cyclonedds.xml}
+  # Receive buffer Cyclone requests; set to e.g. 10MB once the host's
+  # net.core.rmem_max allows it.
+  CYCLONEDDS_RCVBUF: ${CYCLONEDDS_RCVBUF:-default}
+  # Semicolon separated IPs of the other host (robot <-> server) when they
+  # are not reachable by multicast, e.g. on different subnets or a VPN.
+  ROS_STATIC_PEERS: ${ROS_STATIC_PEERS:-}
   DISPLAY: ${DISPLAY}
   QT_X11_NO_MITSHM: 1
   XAUTHORITY: /root/.Xauthority
